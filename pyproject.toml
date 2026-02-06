@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pebble-connector"
+version = "0.1.0"
+description = "Pebble Database Connector - polls for and executes database query jobs"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiohttp = "^3.9"
+asyncpg = "^0.29"
+"cloud-sql-python-connector" = {version = "^1.12", extras = ["asyncpg"]}
+google-auth = "^2.27"
+
+[tool.poetry.scripts]
+pebble-connector = "src.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

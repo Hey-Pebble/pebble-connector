@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pebble-connector.fullname" . }}
+  labels:
+    {{- include "pebble-connector.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "pebble-connector.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "pebble-connector.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "pebble-connector.serviceAccountName" . }}
+      containers:
+        - name: connector
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PEBBLE_API_URL
+              value: {{ .Values.pebble.apiUrl | quote }}
+            - name: PEBBLE_COMPANY_ID
+              value: {{ .Values.pebble.companyId | quote }}
+            - name: PEBBLE_AGENT_API_KEY
+              {{- if .Values.pebble.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.pebble.existingSecret }}
+                  key: agent-api-key
+              {{- else }}
+              value: {{ .Values.pebble.agentApiKey | quote }}
+              {{- end }}
+            - name: GCP_PROJECT_ID
+              value: {{ .Values.gcp.projectId | quote }}
+            - name: GCP_REGION
+              value: {{ .Values.gcp.region | quote }}
+            - name: GCP_INSTANCE_NAME
+              value: {{ .Values.gcp.instanceName | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_IAM_USER
+              value: {{ .Values.database.iamUser | quote }}
+            - name: NUM_WORKERS
+              value: {{ .Values.agent.workers | quote }}
+            - name: POLL_INTERVAL
+              value: {{ .Values.agent.pollInterval | quote }}
+            - name: IP_TYPE
+              value: {{ .Values.agent.ipType | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
