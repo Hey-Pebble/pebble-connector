@@ -98,13 +98,13 @@ class PebbleAgent:
                     break
 
                 row_data = [self._serialize_value(row[col]) for col in columns]
-                row_str = json.dumps(row_data)
-                total_bytes += len(row_str.encode())
+                row_bytes = len(json.dumps(row_data).encode())
 
-                if total_bytes > self.config.MAX_RESULT_BYTES:
+                if total_bytes + row_bytes > self.config.MAX_RESULT_BYTES:
                     truncated = True
                     break
 
+                total_bytes += row_bytes
                 result_rows.append(row_data)
 
             return {
