@@ -54,9 +54,10 @@ class PebbleAgent:
             "X-Pebble-Agent-Key": self.config.PEBBLE_AGENT_API_KEY,
         }
         data = {"company_id": self.config.PEBBLE_COMPANY_ID}
+        timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
 
         try:
-            async with session.post(url, headers=headers, json=data) as resp:
+            async with session.post(url, headers=headers, json=data, timeout=timeout) as resp:
                 if resp.status == 200:
                     result = await resp.json()
                     return result.get("job")
@@ -77,7 +78,7 @@ class PebbleAgent:
         if not is_valid:
             raise ValueError(f"Query validation failed: {error}")
 
-        conn = await self.get_connection()
+        conn = await asyncio.wait_for(self.get_connection(), timeout=self.config.CONNECTION_TIMEOUT)
         try:
             await conn.execute(f"SET statement_timeout = '{timeout * 1000}'")
 
@@ -92,11 +93,15 @@ class PebbleAgent:
             truncated = False
 
             for row in rows:
+                if len(result_rows) >= self.config.MAX_RESULT_ROWS:
+                    truncated = True
+                    break
+
                 row_data = [self._serialize_value(row[col]) for col in columns]
                 row_str = json.dumps(row_data)
                 total_bytes += len(row_str.encode())
 
-                if total_bytes > 262144:  # 256KB limit
+                if total_bytes > self.config.MAX_RESULT_BYTES:
                     truncated = True
                     break
 
@@ -139,8 +144,9 @@ class PebbleAgent:
         elif results:
             data["results"] = results
 
+        timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
         try:
-            async with session.post(url, headers=headers, json=data) as resp:
+            async with session.post(url, headers=headers, json=data, timeout=timeout) as resp:
                 if resp.status == 200:
                     logger.info(f"Job {job_id} completed successfully")
                 else:
@@ -153,6 +159,7 @@ class PebbleAgent:
 async def worker(agent: PebbleAgent, worker_id: int):
     """Single worker coroutine - polls, executes, completes in a loop."""
     logger.info(f"Worker {worker_id} started")
+    consecutive_errors = 0
 
     async with aiohttp.ClientSession() as session:
         while True:
@@ -175,9 +182,14 @@ async def worker(agent: PebbleAgent, worker_id: int):
                         execution_time_ms = int((time.time() - start_time) * 1000)
                         logger.error(f"Worker {worker_id} query failed: {e}")
                         await agent.complete_job(session, job["id"], error=str(e), execution_time_ms=execution_time_ms)
+
+                    consecutive_errors = 0
                 else:
+                    consecutive_errors = 0
                     await asyncio.sleep(agent.config.POLL_INTERVAL)
 
             except Exception as e:
-                logger.error(f"Worker {worker_id} error: {e}")
-                await asyncio.sleep(1)
+                consecutive_errors += 1
+                backoff = min(2 ** consecutive_errors, 60)
+                logger.error(f"Worker {worker_id} error (retry in {backoff}s): {e}")
+                await asyncio.sleep(backoff)
