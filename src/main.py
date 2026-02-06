@@ -18,6 +18,8 @@ def main():
     config = Config()
 
     missing = []
+    if not config.PEBBLE_API_URL:
+        missing.append("PEBBLE_API_URL")
     if not config.PEBBLE_AGENT_API_KEY:
         missing.append("PEBBLE_AGENT_API_KEY")
     if not config.PEBBLE_COMPANY_ID:

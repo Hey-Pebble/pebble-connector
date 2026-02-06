@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir poetry && \
     poetry config virtualenvs.in-project true
 
 COPY pyproject.toml poetry.lock ./
-RUN poetry install --without dev --no-interaction
+RUN poetry install --no-interaction
 
 COPY src/ src/
 
