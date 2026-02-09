@@ -4,7 +4,7 @@ image:
   pullPolicy: IfNotPresent
 
 pebble:
-  apiUrl: "https://api.pebble.dev"
+  apiUrl: "https://pebble.venturecatalyst.ai"
   companyId: ""
   # API key - set via --set or reference an existing secret
   agentApiKey: ""
@@ -14,6 +14,7 @@ gcp:
   projectId: ""
   region: ""
   instanceName: ""
+  iapClientId: ""  # OAuth client ID for IAP-protected backend
 
 database:
   name: ""

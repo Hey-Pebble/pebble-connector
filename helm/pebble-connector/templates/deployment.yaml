@@ -39,6 +39,8 @@ spec:
               value: {{ .Values.gcp.region | quote }}
             - name: GCP_INSTANCE_NAME
               value: {{ .Values.gcp.instanceName | quote }}
+            - name: IAP_CLIENT_ID
+              value: {{ .Values.gcp.iapClientId | quote }}
             - name: DB_NAME
               value: {{ .Values.database.name | quote }}
             - name: DB_IAM_USER

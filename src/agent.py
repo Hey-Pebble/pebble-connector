@@ -7,6 +7,8 @@ import time
 from typing import Any, Dict, Optional
 
 import aiohttp
+import google.auth.transport.requests
+import google.oauth2.id_token
 from google.cloud.sql.connector import Connector, IPTypes
 
 from src.config import Config
@@ -15,10 +17,15 @@ from src.query_validator import validate_query
 logger = logging.getLogger(__name__)
 
 
+TOKEN_REFRESH_SECONDS = 45 * 60  # Refresh IAP token every 45 minutes
+
+
 class PebbleAgent:
     def __init__(self, config: Config):
         self.config = config
         self.connector: Optional[Connector] = None
+        self._iap_token: Optional[str] = None
+        self._iap_token_time: float = 0
 
     async def setup(self):
         """Initialize Cloud SQL connector for IAM auth."""
@@ -28,7 +35,7 @@ class PebbleAgent:
             f"database={self.config.DB_NAME} user={self.config.DB_IAM_USER}"
         )
 
-    async def get_connection(self):
+    async def get_connection(self, database_name: str = ""):
         """Get a database connection via Cloud SQL IAM auth."""
         if not self.connector:
             raise RuntimeError("Connector not initialized")
@@ -37,10 +44,30 @@ class PebbleAgent:
             self.config.instance_connection_name,
             "asyncpg",
             user=self.config.DB_IAM_USER,
-            db=self.config.DB_NAME,
+            db=database_name or self.config.DB_NAME,
             enable_iam_auth=True,
             ip_type=ip_type,
         )
+
+    def _get_iap_token(self) -> str:
+        """Get a cached IAP ID token, refreshing every 45 minutes."""
+        now = time.time()
+        if not self._iap_token or (now - self._iap_token_time) >= TOKEN_REFRESH_SECONDS:
+            auth_req = google.auth.transport.requests.Request()
+            self._iap_token = google.oauth2.id_token.fetch_id_token(auth_req, self.config.IAP_CLIENT_ID)
+            self._iap_token_time = now
+            logger.debug("Refreshed IAP token")
+        return self._iap_token
+
+    def _get_headers(self) -> Dict[str, str]:
+        """Get request headers including IAP authentication."""
+        headers = {
+            "Content-Type": "application/json",
+            "X-Pebble-Agent-Key": self.config.PEBBLE_AGENT_API_KEY,
+        }
+        if self.config.IAP_CLIENT_ID:
+            headers["Authorization"] = f"Bearer {self._get_iap_token()}"
+        return headers
 
     async def cleanup(self):
         if self.connector:
@@ -49,10 +76,7 @@ class PebbleAgent:
     async def poll_for_job(self, session: aiohttp.ClientSession) -> Optional[Dict[str, Any]]:
         """Poll Pebble backend for a pending query job."""
         url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/poll/"
-        headers = {
-            "Content-Type": "application/json",
-            "X-Pebble-Agent-Key": self.config.PEBBLE_AGENT_API_KEY,
-        }
+        headers = self._get_headers()
         data = {"company_id": self.config.PEBBLE_COMPANY_ID}
         timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
 
@@ -78,7 +102,7 @@ class PebbleAgent:
         if not is_valid:
             raise ValueError(f"Query validation failed: {error}")
 
-        conn = await asyncio.wait_for(self.get_connection(), timeout=self.config.CONNECTION_TIMEOUT)
+        conn = await asyncio.wait_for(self.get_connection(database_name), timeout=self.config.CONNECTION_TIMEOUT)
         try:
             await conn.execute(f"SET statement_timeout = '{timeout * 1000}'")
 
@@ -130,10 +154,7 @@ class PebbleAgent:
                            execution_time_ms: int = 0):
         """Report job completion to Pebble."""
         url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/complete/"
-        headers = {
-            "Content-Type": "application/json",
-            "X-Pebble-Agent-Key": self.config.PEBBLE_AGENT_API_KEY,
-        }
+        headers = self._get_headers()
         data: Dict[str, Any] = {
             "company_id": self.config.PEBBLE_COMPANY_ID,
             "job_id": job_id,
