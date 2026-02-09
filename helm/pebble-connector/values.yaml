@@ -1,0 +1,42 @@
+image:
+  repository: ghcr.io/pebble-dev/pebble-connector
+  tag: ""  # Defaults to chart appVersion
+  pullPolicy: IfNotPresent
+
+pebble:
+  apiUrl: "https://pebble.venturecatalyst.ai"
+  companyId: ""
+  # API key - set via --set or reference an existing secret
+  agentApiKey: ""
+  existingSecret: ""  # Name of existing K8s secret with 'agent-api-key' key
+
+gcp:
+  projectId: ""
+  region: ""
+  instanceName: ""
+  iapClientId: ""  # OAuth client ID for IAP-protected backend
+
+database:
+  name: ""
+  iamUser: ""
+
+agent:
+  workers: 5
+  pollInterval: 5
+  ipType: "PRIVATE"
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  # For GKE Workload Identity:
+  #   iam.gke.io/gcp-service-account: pebble-sa@your-project.iam.gserviceaccount.com
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+replicaCount: 1
