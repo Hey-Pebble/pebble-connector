@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/Hey-Pebble/pebble-connector
+  repository: ghcr.io/hey-pebble/pebble-connector
   tag: ""  # Defaults to chart appVersion
   pullPolicy: IfNotPresent
 
