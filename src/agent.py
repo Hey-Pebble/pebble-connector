@@ -77,7 +77,7 @@ class PebbleAgent:
         """Poll Pebble backend for a pending query job."""
         url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/poll/"
         headers = self._get_headers()
-        data = {"company_id": self.config.PEBBLE_COMPANY_ID}
+        data = {}
         timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
 
         try:
@@ -156,7 +156,6 @@ class PebbleAgent:
         url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/complete/"
         headers = self._get_headers()
         data: Dict[str, Any] = {
-            "company_id": self.config.PEBBLE_COMPANY_ID,
             "job_id": job_id,
             "execution_time_ms": execution_time_ms,
         }
