@@ -63,7 +63,7 @@ class PebbleAgent:
         """Get request headers including IAP authentication."""
         headers = {
             "Content-Type": "application/json",
-            "X-Pebble-Agent-Key": self.config.PEBBLE_AGENT_API_KEY,
+            "X-Pebble-Connector-Key": self.config.PEBBLE_AGENT_API_KEY,
         }
         if self.config.IAP_CLIENT_ID:
             headers["Authorization"] = f"Bearer {self._get_iap_token()}"
