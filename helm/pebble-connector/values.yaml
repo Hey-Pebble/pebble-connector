@@ -5,7 +5,6 @@ image:
 
 pebble:
   apiUrl: "https://pebble.venturecatalyst.ai"
-  companyId: ""
   # API key - set via --set or reference an existing secret
   agentApiKey: ""
   existingSecret: ""  # Name of existing K8s secret with 'agent-api-key' key
