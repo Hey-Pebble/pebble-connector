@@ -32,6 +32,8 @@ def main():
         missing.append("DB_NAME")
     if not config.DB_IAM_USER:
         missing.append("DB_IAM_USER")
+    if not config.IAP_CLIENT_ID:
+        missing.append("IAP_CLIENT_ID")
 
     if missing:
         logger.error(f"Missing required environment variables: {', '.join(missing)}")
