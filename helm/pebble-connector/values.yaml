@@ -13,7 +13,7 @@ gcp:
   projectId: ""
   region: ""
   instanceName: ""
-  iapClientId: ""  # OAuth client ID for IAP-protected backend
+  iapClientId: ""  # Required: OAuth client ID for IAP-protected backend
 
 database:
   name: ""
