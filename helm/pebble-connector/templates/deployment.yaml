@@ -22,14 +22,14 @@ spec:
           env:
             - name: PEBBLE_API_URL
               value: {{ .Values.pebble.apiUrl | quote }}
-            - name: PEBBLE_AGENT_API_KEY
+            - name: PEBBLE_CONNECTOR_API_KEY
               {{- if .Values.pebble.existingSecret }}
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.pebble.existingSecret }}
-                  key: agent-api-key
+                  key: connector-api-key
               {{- else }}
-              value: {{ .Values.pebble.agentApiKey | quote }}
+              value: {{ .Values.pebble.connectorApiKey | quote }}
               {{- end }}
             - name: GCP_PROJECT_ID
               value: {{ .Values.gcp.projectId | quote }}
@@ -44,10 +44,10 @@ spec:
             - name: DB_IAM_USER
               value: {{ .Values.database.iamUser | quote }}
             - name: NUM_WORKERS
-              value: {{ .Values.agent.workers | quote }}
+              value: {{ .Values.connector.workers | quote }}
             - name: POLL_INTERVAL
-              value: {{ .Values.agent.pollInterval | quote }}
+              value: {{ .Values.connector.pollInterval | quote }}
             - name: IP_TYPE
-              value: {{ .Values.agent.ipType | quote }}
+              value: {{ .Values.connector.ipType | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

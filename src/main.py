@@ -20,8 +20,8 @@ def main():
     missing = []
     if not config.PEBBLE_API_URL:
         missing.append("PEBBLE_API_URL")
-    if not config.PEBBLE_AGENT_API_KEY:
-        missing.append("PEBBLE_AGENT_API_KEY")
+    if not config.PEBBLE_CONNECTOR_API_KEY:
+        missing.append("PEBBLE_CONNECTOR_API_KEY")
     if not config.GCP_PROJECT_ID:
         missing.append("GCP_PROJECT_ID")
     if not config.GCP_REGION:

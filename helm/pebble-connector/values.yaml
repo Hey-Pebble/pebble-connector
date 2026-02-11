@@ -6,8 +6,8 @@ image:
 pebble:
   apiUrl: "https://pebble.venturecatalyst.ai"
   # API key - set via --set or reference an existing secret
-  agentApiKey: ""
-  existingSecret: ""  # Name of existing K8s secret with 'agent-api-key' key
+  connectorApiKey: ""
+  existingSecret: ""  # Name of existing K8s secret with 'connector-api-key' key
 
 gcp:
   projectId: ""
@@ -19,7 +19,7 @@ database:
   name: ""
   iamUser: ""
 
-agent:
+connector:
   workers: 5
   pollInterval: 5
   ipType: "PRIVATE"

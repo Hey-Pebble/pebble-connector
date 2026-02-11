@@ -63,7 +63,7 @@ class PebbleAgent:
         """Get request headers including IAP authentication."""
         headers = {
             "Content-Type": "application/json",
-            "X-Pebble-Connector-Key": self.config.PEBBLE_AGENT_API_KEY,
+            "X-Pebble-Connector-Key": self.config.PEBBLE_CONNECTOR_API_KEY,
         }
         if self.config.IAP_CLIENT_ID:
             headers["Authorization"] = f"Bearer {self._get_iap_token()}"
@@ -86,7 +86,7 @@ class PebbleAgent:
                     result = await resp.json()
                     return result.get("job")
                 elif resp.status == 401:
-                    logger.error("Authentication failed - check PEBBLE_AGENT_API_KEY")
+                    logger.error("Authentication failed - check PEBBLE_CONNECTOR_API_KEY")
                     return None
                 else:
                     text = await resp.text()
