@@ -11,6 +11,11 @@ asyncpg = "^0.29"
 "cloud-sql-python-connector" = {version = "^1.12", extras = ["asyncpg"]}
 google-auth = "^2.27"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.23"
+aioresponses = "^0.7"
+
 [tool.poetry.scripts]
 pebble-connector = "src.main:main"
 

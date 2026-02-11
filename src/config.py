@@ -18,7 +18,7 @@ class Config:
     IP_TYPE = os.getenv("IP_TYPE", "PRIVATE")  # PRIVATE (default for VPC), PUBLIC, or PSC
 
     # Worker settings
-    NUM_WORKERS = int(os.getenv("NUM_WORKERS", "2"))
+    NUM_WORKERS = int(os.getenv("NUM_WORKERS", "5"))
     POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "5"))
 
     # Result limits (from spec: 1000 rows, 256KB)

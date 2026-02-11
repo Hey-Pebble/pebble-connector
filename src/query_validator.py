@@ -26,11 +26,14 @@ def validate_query(sql: str) -> tuple[bool, str]:
     if not (upper.startswith("SELECT") or upper.startswith("WITH")):
         return False, "Only SELECT queries are allowed"
 
-    # Check for dangerous keywords (not inside quotes)
+    # Strip string literals so keywords inside quotes don't cause false positives
+    stripped = re.sub(r"'[^']*'", "''", upper)
+    stripped = re.sub(r'"[^"]*"', '""', stripped)
+
+    # Check for dangerous keywords
     for keyword in WRITE_KEYWORDS:
-        # Simple check - look for keyword as a whole word
         pattern = rf'\b{keyword}\b'
-        if re.search(pattern, upper):
+        if re.search(pattern, stripped):
             return False, f"Query contains forbidden keyword: {keyword}"
 
     return True, ""
