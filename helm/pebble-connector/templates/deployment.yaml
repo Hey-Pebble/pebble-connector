@@ -22,8 +22,6 @@ spec:
           env:
             - name: PEBBLE_API_URL
               value: {{ .Values.pebble.apiUrl | quote }}
-            - name: PEBBLE_COMPANY_ID
-              value: {{ .Values.pebble.companyId | quote }}
             - name: PEBBLE_AGENT_API_KEY
               {{- if .Values.pebble.existingSecret }}
               valueFrom:

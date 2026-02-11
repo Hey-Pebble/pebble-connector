@@ -22,8 +22,6 @@ def main():
         missing.append("PEBBLE_API_URL")
     if not config.PEBBLE_AGENT_API_KEY:
         missing.append("PEBBLE_AGENT_API_KEY")
-    if not config.PEBBLE_COMPANY_ID:
-        missing.append("PEBBLE_COMPANY_ID")
     if not config.GCP_PROJECT_ID:
         missing.append("GCP_PROJECT_ID")
     if not config.GCP_REGION:

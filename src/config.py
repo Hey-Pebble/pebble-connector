@@ -5,7 +5,6 @@ class Config:
     # Pebble backend
     PEBBLE_API_URL = os.getenv("PEBBLE_API_URL", "")
     PEBBLE_AGENT_API_KEY = os.getenv("PEBBLE_AGENT_API_KEY", "")
-    PEBBLE_COMPANY_ID = os.getenv("PEBBLE_COMPANY_ID", "")
 
     # GCP Cloud SQL connection (IAM auth - no password needed)
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
