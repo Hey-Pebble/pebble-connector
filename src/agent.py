@@ -75,7 +75,7 @@ class PebbleAgent:
 
     async def poll_for_job(self, session: aiohttp.ClientSession) -> Optional[Dict[str, Any]]:
         """Poll Pebble backend for a pending query job."""
-        url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/poll/"
+        url = f"{self.config.PEBBLE_API_URL}/pebble_app/connector/poll/"
         headers = self._get_headers()
         data = {}
         timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
@@ -153,7 +153,7 @@ class PebbleAgent:
                            results: Optional[Dict] = None, error: Optional[str] = None,
                            execution_time_ms: int = 0):
         """Report job completion to Pebble."""
-        url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/complete/"
+        url = f"{self.config.PEBBLE_API_URL}/pebble_app/connector/complete/"
         headers = self._get_headers()
         data: Dict[str, Any] = {
             "job_id": job_id,
