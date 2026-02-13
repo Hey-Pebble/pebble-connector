@@ -4,7 +4,7 @@ import asyncio
 import logging
 import sys
 
-from src.agent import PebbleAgent, worker
+from src.connector import PebbleAgent, worker
 from src.config import Config
 
 logging.basicConfig(
