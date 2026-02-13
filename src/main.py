@@ -4,7 +4,7 @@ import asyncio
 import logging
 import sys
 
-from src.connector import PebbleAgent, worker
+from src.connector import PebbleConnector, worker
 from src.config import Config
 
 logging.basicConfig(
@@ -49,7 +49,7 @@ def main():
 
 
 async def run(config: Config):
-    agent = PebbleAgent(config)
+    agent = PebbleConnector(config)
     await agent.setup()
 
     try:

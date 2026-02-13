@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 TOKEN_REFRESH_SECONDS = 45 * 60  # Refresh IAP token every 45 minutes
 
 
-class PebbleAgent:
+class PebbleConnector:
     def __init__(self, config: Config):
         self.config = config
         self.connector: Optional[Connector] = None
@@ -176,7 +176,7 @@ class PebbleAgent:
             logger.error(f"Failed to report job completion: {e}")
 
 
-async def worker(agent: PebbleAgent, worker_id: int):
+async def worker(agent: PebbleConnector, worker_id: int):
     """Single worker coroutine - polls, executes, completes in a loop."""
     logger.info(f"Worker {worker_id} started")
     consecutive_errors = 0
