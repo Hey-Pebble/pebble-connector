@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 TOKEN_REFRESH_SECONDS = 45 * 60  # Refresh IAP token every 45 minutes
 
 
-class PebbleAgent:
+class PebbleConnector:
     def __init__(self, config: Config):
         self.config = config
         self.connector: Optional[Connector] = None
@@ -63,7 +63,7 @@ class PebbleAgent:
         """Get request headers including IAP authentication."""
         headers = {
             "Content-Type": "application/json",
-            "X-Pebble-Connector-Key": self.config.PEBBLE_AGENT_API_KEY,
+            "X-Pebble-Connector-Key": self.config.PEBBLE_CONNECTOR_API_KEY,
         }
         if self.config.IAP_CLIENT_ID:
             headers["Authorization"] = f"Bearer {self._get_iap_token()}"
@@ -75,7 +75,7 @@ class PebbleAgent:
 
     async def poll_for_job(self, session: aiohttp.ClientSession) -> Optional[Dict[str, Any]]:
         """Poll Pebble backend for a pending query job."""
-        url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/poll/"
+        url = f"{self.config.PEBBLE_API_URL}/pebble_app/connector/poll/"
         headers = self._get_headers()
         data = {}
         timeout = aiohttp.ClientTimeout(total=self.config.HTTP_TIMEOUT)
@@ -86,7 +86,7 @@ class PebbleAgent:
                     result = await resp.json()
                     return result.get("job")
                 elif resp.status == 401:
-                    logger.error("Authentication failed - check PEBBLE_AGENT_API_KEY")
+                    logger.error("Authentication failed - check PEBBLE_CONNECTOR_API_KEY")
                     return None
                 else:
                     text = await resp.text()
@@ -153,7 +153,7 @@ class PebbleAgent:
                            results: Optional[Dict] = None, error: Optional[str] = None,
                            execution_time_ms: int = 0):
         """Report job completion to Pebble."""
-        url = f"{self.config.PEBBLE_API_URL}/pebble_app/agent/complete/"
+        url = f"{self.config.PEBBLE_API_URL}/pebble_app/connector/complete/"
         headers = self._get_headers()
         data: Dict[str, Any] = {
             "job_id": job_id,
@@ -176,7 +176,7 @@ class PebbleAgent:
             logger.error(f"Failed to report job completion: {e}")
 
 
-async def worker(agent: PebbleAgent, worker_id: int):
+async def worker(agent: PebbleConnector, worker_id: int):
     """Single worker coroutine - polls, executes, completes in a loop."""
     logger.info(f"Worker {worker_id} started")
     consecutive_errors = 0
