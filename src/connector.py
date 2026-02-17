@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 import aiohttp
 import google.auth.transport.requests
 import google.oauth2.id_token
+import requests
 from google.cloud.sql.connector import Connector, IPTypes
 
 from src.config import Config
@@ -50,14 +51,48 @@ class PebbleConnector:
         )
 
     def _get_iap_token(self) -> str:
-        """Get a cached IAP ID token, refreshing every 45 minutes."""
+        """Get a cached IAP token, refreshing every 45 minutes.
+
+        When IDENTITY_PLATFORM_API_KEY is set, exchanges the Google ID token
+        for an Identity Platform token (required when GCIP is enabled on IAP).
+        """
         now = time.time()
         if not self._iap_token or (now - self._iap_token_time) >= TOKEN_REFRESH_SECONDS:
             auth_req = google.auth.transport.requests.Request()
-            self._iap_token = google.oauth2.id_token.fetch_id_token(auth_req, self.config.IAP_CLIENT_ID)
+            google_id_token = google.oauth2.id_token.fetch_id_token(
+                auth_req, self.config.IAP_CLIENT_ID
+            )
+
+            if self.config.IDENTITY_PLATFORM_API_KEY:
+                self._iap_token = self._exchange_for_identity_platform_token(google_id_token)
+            else:
+                self._iap_token = google_id_token
+
             self._iap_token_time = now
             logger.debug("Refreshed IAP token")
         return self._iap_token
+
+    def _exchange_for_identity_platform_token(self, google_id_token: str) -> str:
+        """Exchange a Google ID token for an Identity Platform token via signInWithIdp."""
+        url = (
+            "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp"
+            f"?key={self.config.IDENTITY_PLATFORM_API_KEY}"
+        )
+        resp = requests.post(url, json={
+            "postBody": f"id_token={google_id_token}&providerId=google.com",
+            "requestUri": "http://localhost",
+            "returnSecureToken": True,
+            "returnIdpCredential": True,
+        }, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if "idToken" not in data:
+            error_msg = data.get("error", {}).get("message", "unknown error")
+            raise RuntimeError(f"Identity Platform token exchange failed: {error_msg}")
+
+        logger.debug("Exchanged Google ID token for Identity Platform token")
+        return data["idToken"]
 
     def _get_headers(self) -> Dict[str, str]:
         """Get request headers including IAP authentication."""
