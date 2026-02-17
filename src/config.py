@@ -10,7 +10,7 @@ class Config:
     GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
     GCP_REGION = os.getenv("GCP_REGION", "")
     GCP_INSTANCE_NAME = os.getenv("GCP_INSTANCE_NAME", "")
-    IAP_CLIENT_ID = os.getenv("IAP_CLIENT_ID", "")  # OAuth client ID for IAP-protected backend
+    IAP_CLIENT_ID = os.getenv("IAP_CLIENT_ID", "")  # Required: OAuth client ID for IAP-protected backend
     IDENTITY_PLATFORM_API_KEY = os.getenv("IDENTITY_PLATFORM_API_KEY", "")
     DB_NAME = os.getenv("DB_NAME", "")
     DB_IAM_USER = os.getenv("DB_IAM_USER", "")  # IAM service account email
