@@ -10,6 +10,7 @@ aiohttp = "^3.9"
 asyncpg = "^0.29"
 "cloud-sql-python-connector" = {version = "^1.12", extras = ["asyncpg"]}
 google-auth = "^2.27"
+requests = "^2.31"
 
 [tool.poetry.scripts]
 pebble-connector = "src.main:main"

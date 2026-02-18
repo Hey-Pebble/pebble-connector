@@ -42,6 +42,7 @@ def main():
     logger.info("Starting Pebble Database Connector")
     logger.info(f"  Pebble API: {config.PEBBLE_API_URL}")
     logger.info(f"  IAP auth:   {'enabled' if config.IAP_CLIENT_ID else 'disabled'}")
+    logger.info(f"  GCIP exchange: {'enabled' if config.IDENTITY_PLATFORM_API_KEY else 'disabled'}")
     logger.info(f"  Cloud SQL:  {config.instance_connection_name}")
     logger.info(f"  Database:   {config.DB_NAME}")
     logger.info(f"  IAM User:   {config.DB_IAM_USER}")
