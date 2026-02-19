@@ -88,7 +88,9 @@ class PebbleConnector:
         data = resp.json()
 
         if "idToken" not in data:
-            error_msg = data.get("error", {}).get("message", "unknown error")
+            # Log the full response for debugging
+            logger.error(f"Identity Platform response missing idToken: {data}")
+            error_msg = data.get("error", {}).get("message", str(data))
             raise RuntimeError(f"Identity Platform token exchange failed: {error_msg}")
 
         logger.debug("Exchanged Google ID token for Identity Platform token")
