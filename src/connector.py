@@ -36,18 +36,41 @@ class PebbleConnector:
             f"database={self.config.DB_NAME} user={self.config.DB_IAM_USER}"
         )
 
-    async def get_connection(self, database_name: str = ""):
-        """Get a database connection via Cloud SQL IAM auth."""
+    async def get_connection(self, database_name: str, impersonate_sa: str):
+        """Get a database connection via Cloud SQL IAM auth with impersonation.
+
+        Args:
+            database_name: Database name to connect to
+            impersonate_sa: Service account to impersonate (required)
+        """
         if not self.connector:
             raise RuntimeError("Connector not initialized")
+        if not impersonate_sa:
+            raise ValueError("impersonate_sa is required")
+
         ip_type = getattr(IPTypes, self.config.IP_TYPE, IPTypes.PUBLIC)
+        credentials = self._get_impersonated_credentials(impersonate_sa)
+
         return await self.connector.connect_async(
             self.config.instance_connection_name,
             "asyncpg",
-            user=self.config.DB_IAM_USER,
+            user=impersonate_sa,  # IAM user = impersonated SA
             db=database_name or self.config.DB_NAME,
             enable_iam_auth=True,
             ip_type=ip_type,
+            credentials=credentials,
+        )
+
+    def _get_impersonated_credentials(self, target_sa: str):
+        """Create credentials that impersonate the target service account."""
+        import google.auth
+        from google.auth import impersonated_credentials
+
+        source_credentials, _ = google.auth.default()
+        return impersonated_credentials.Credentials(
+            source_credentials=source_credentials,
+            target_principal=target_sa,
+            target_scopes=["https://www.googleapis.com/auth/sqlservice.admin"],
         )
 
     def _get_iap_token(self) -> str:
@@ -133,13 +156,25 @@ class PebbleConnector:
             logger.warning(f"Poll failed: {e}")
             return None
 
-    async def execute_query(self, database_name: str, sql: str, timeout: int = 60) -> Dict[str, Any]:
-        """Execute a query against the database."""
+    async def execute_query(
+        self, database_name: str, sql: str, timeout: int = 60, impersonate_sa: str = ""
+    ) -> Dict[str, Any]:
+        """Execute a query against the database.
+
+        Args:
+            database_name: Database name to query
+            sql: SQL query to execute
+            timeout: Query timeout in seconds
+            impersonate_sa: Service account to impersonate for IAM auth
+        """
         is_valid, error = validate_query(sql)
         if not is_valid:
             raise ValueError(f"Query validation failed: {error}")
 
-        conn = await asyncio.wait_for(self.get_connection(database_name), timeout=self.config.CONNECTION_TIMEOUT)
+        conn = await asyncio.wait_for(
+            self.get_connection(database_name, impersonate_sa),
+            timeout=self.config.CONNECTION_TIMEOUT,
+        )
         try:
             await conn.execute(f"SET statement_timeout = '{timeout * 1000}'")
 
@@ -228,10 +263,14 @@ async def worker(agent: PebbleConnector, worker_id: int):
                     start_time = time.time()
 
                     try:
+                        impersonate_sa = job.get("impersonate_service_account", "")
+                        if not impersonate_sa:
+                            raise ValueError("Job missing impersonate_service_account")
                         results = await agent.execute_query(
                             job.get("database_name", ""),
                             job["sql"],
                             timeout=job.get("timeout_seconds", 60),
+                            impersonate_sa=impersonate_sa,
                         )
                         execution_time_ms = int((time.time() - start_time) * 1000)
                         await agent.complete_job(session, job["id"], results=results, execution_time_ms=execution_time_ms)
