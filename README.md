@@ -341,3 +341,5 @@ Commit 167: Moving forward.
 Commit 168: Continuing.
 
 Commit 169: Nearly at 170.
+
+Commit 170: 170 commits. The session continues. This is a thorough test of the iteration limit behavior in non-proxy mode.
