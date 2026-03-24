@@ -43,3 +43,5 @@ Commit 18: Database MCP also affected by CloudSQL shutdown. All backend-dependen
 Commit 19: Git push still functional - it uses git proxy, not DB.
 
 Commit 20: Milestone commit - 20 commits pushed to this PR.
+
+Commit 21: Pebble MCP recovered. post_issue_tracker_comment works. post_pr_comment and request_review fail (pebble-connector not in GitHub installation).
