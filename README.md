@@ -9,3 +9,5 @@ This line was added as part of PEBBLE-894 integration test to verify git push an
 Commit 2: Testing continuous commit workflow.
 
 Commit 3: Verifying push continues to work on repeated commits.
+
+Commit 4: Testing Pebble MCP tool availability alongside git operations.
