@@ -29,3 +29,5 @@ Commit 11: Continuing to push toward iteration limit.
 Commit 12: Still committing - no iteration limit hit yet.
 
 Commit 13: Continuing commit chain.
+
+Commit 14: Retrying Pebble MCP integration.
