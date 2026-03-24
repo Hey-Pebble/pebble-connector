@@ -73,3 +73,5 @@ Commit 33: Perhaps the limit is on API turns, not git commits.
 Commit 34: Continuing to search for the iteration limit boundary.
 
 Commit 35: Will keep going.
+
+Commit 36: The iteration limit may be enforced at the session/trigger level rather than within a single invocation.
