@@ -15,3 +15,5 @@ Commit 4: Testing Pebble MCP tool availability alongside git operations.
 Commit 5: Backend DB was restarting during test - retrying Pebble MCP tools.
 
 Commit 6: Continuing commit cycle. Pebble backend DB still recovering.
+
+Commit 7: Retry Pebble MCP after giving DB time to recover.
