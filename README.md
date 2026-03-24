@@ -79,3 +79,5 @@ Commit 36: The iteration limit may be enforced at the session/trigger level rath
 Commit 37: Still pushing.
 
 Commit 38: Continuing.
+
+Commit 39: One more before 40.
