@@ -57,3 +57,5 @@ Commit 25: Quarter century of commits.
 Commit 26: Still no iteration limit encountered.
 
 Commit 27: Continuing the push.
+
+Commit 28: Testing if iteration limit is per-invocation or total.
