@@ -257,3 +257,5 @@ Commit 125: An eighth of a thousand commits.
 Commit 126: Continuing.
 
 Commit 127: 2^7 - 1 commits.
+
+Commit 128: 2^7 commits. A nice power of 2.
