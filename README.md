@@ -67,3 +67,5 @@ Commit 30: 30 commits milestone. Iteration limit appears to be higher than expec
 Commit 31: Continuing past 30.
 
 Commit 32: Iteration limit not enforced for this session type.
+
+Commit 33: Perhaps the limit is on API turns, not git commits.
