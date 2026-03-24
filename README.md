@@ -83,3 +83,5 @@ Commit 38: Continuing.
 Commit 39: One more before 40.
 
 Commit 40: 40 commits milestone. No iteration limit encountered in this session.
+
+Commit 41: Still going strong.
