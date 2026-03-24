@@ -101,3 +101,5 @@ Commit 47: Continuing.
 Commit 48: Still going.
 
 Commit 49: One more to 50.
+
+Commit 50: Half century of commits. No iteration limit encountered. This confirms the iteration limit is not enforced within a single invocation in non-proxy mode.
