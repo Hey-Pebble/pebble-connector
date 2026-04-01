@@ -89,7 +89,7 @@ spec:
         - port: 443
           protocol: TCP
       to:
-        - fqdn: {{ .Values.pebble.apiUrl | trimPrefix "https://" | trimPrefix "http://" | quote }}
+        - fqdn: {{ (urlParse (required "pebble.apiUrl must be set when networkPolicy is enabled" .Values.pebble.apiUrl)).host | quote }}
         {{- range .Values.networkPolicy.allowedFQDNs }}
         - fqdn: {{ . | quote }}
         {{- end }}
