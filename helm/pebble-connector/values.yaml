@@ -44,8 +44,10 @@ replicaCount: 1
 networkPolicy:
   enabled: false
   # FQDNs the connector is allowed to reach (port 443).
-  # Must include the backend API URL hostname.
+  # Must include the backend API URL hostname (keep in sync with pebble.apiUrl).
+  # Requires GKE Dataplane V2 (default on Autopilot). Uses alpha FQDNNetworkPolicy API.
   # Cloud SQL (private IP), GCP APIs (PGA VIP), DNS, and metadata server
   # are allowed by CIDR rules in the standard NetworkPolicy.
-  allowedFQDNs:
-    - "pebble.venturecatalyst.ai"
+  allowedFQDNs: []  # Required when enabled. Example: ["pebble.venturecatalyst.ai"]
+  # Cloud SQL CIDR — tighten to the actual replica subnet per-environment
+  cloudSqlCidr: "10.0.0.0/8"
