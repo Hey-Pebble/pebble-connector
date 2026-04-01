@@ -40,3 +40,12 @@ resources:
     memory: 256Mi
 
 replicaCount: 1
+
+networkPolicy:
+  enabled: false
+  # FQDNs the connector is allowed to reach (port 443).
+  # Must include the backend API URL hostname.
+  # Cloud SQL (private IP), GCP APIs (PGA VIP), DNS, and metadata server
+  # are allowed by CIDR rules in the standard NetworkPolicy.
+  allowedFQDNs:
+    - "pebble.venturecatalyst.ai"
