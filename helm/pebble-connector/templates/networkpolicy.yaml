@@ -14,11 +14,27 @@ spec:
   policyTypes:
     - Egress
   egress:
-    # DNS resolution — scoped to kube-system namespace (kube-dns)
+    # DNS resolution — kube-dns
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # DNS resolution — NodeLocal DNSCache (enabled by default on Autopilot)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: node-local-dns
       ports:
         - port: 53
           protocol: UDP
@@ -34,10 +50,9 @@ spec:
           protocol: TCP
 
     # Cloud SQL read replica (private IP, Cloud SQL connector port)
-    # Default 10.0.0.0/8 — tighten per-environment via networkPolicy.cloudSqlCidr
     - to:
         - ipBlock:
-            cidr: {{ .Values.networkPolicy.cloudSqlCidr | default "10.0.0.0/8" }}
+            cidr: {{ required "networkPolicy.cloudSqlCidr must be set when networkPolicy is enabled" .Values.networkPolicy.cloudSqlCidr }}
       ports:
         - port: 3307
           protocol: TCP
@@ -52,9 +67,9 @@ spec:
       ports:
         - port: 443
           protocol: TCP
-{{- if .Values.networkPolicy.allowedFQDNs }}
 ---
-# FQDN-based egress policy for the backend API URL.
+# FQDN-based egress policy for the backend API URL (auto-derived from pebble.apiUrl)
+# plus any additional FQDNs in networkPolicy.allowedFQDNs.
 # Requires GKE Dataplane V2 (enabled by default on Autopilot).
 # Note: networking.gke.io/v1alpha1 is an alpha API — may change in future GKE versions.
 apiVersion: networking.gke.io/v1alpha1
@@ -74,8 +89,8 @@ spec:
         - port: 443
           protocol: TCP
       to:
+        - fqdn: {{ .Values.pebble.apiUrl | trimPrefix "https://" | trimPrefix "http://" | quote }}
         {{- range .Values.networkPolicy.allowedFQDNs }}
         - fqdn: {{ . | quote }}
         {{- end }}
-{{- end }}
 {{- end }}
