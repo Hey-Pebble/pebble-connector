@@ -42,10 +42,12 @@ resources:
 replicaCount: 1
 
 networkPolicy:
+  # Requires GKE Dataplane V2 (default on Autopilot; must be explicitly enabled on Standard).
+  # Uses the alpha FQDNNetworkPolicy API — may change on GKE version upgrades.
+  # pebble.apiUrl must include a scheme (e.g. https://...) when enabled.
   enabled: false
   # Additional FQDNs the connector is allowed to reach on port 443.
   # The backend API hostname is auto-derived from pebble.apiUrl — no need to duplicate it here.
-  # Requires GKE Dataplane V2 (default on Autopilot). Uses alpha FQDNNetworkPolicy API.
   allowedFQDNs: []
   # Cloud SQL CIDR — REQUIRED when networkPolicy is enabled.
   # Set to the actual Cloud SQL private IP or subnet (e.g. "10.50.0.2/32").

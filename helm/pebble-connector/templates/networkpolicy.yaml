@@ -86,8 +86,12 @@ spec:
     - ports:
         - port: 443
           protocol: TCP
+      {{- $apiHost := (urlParse (required "pebble.apiUrl must be set when networkPolicy is enabled" .Values.pebble.apiUrl)).host | regexReplaceAll ":\\d+$" "" }}
+      {{- if not $apiHost }}
+      {{- fail "pebble.apiUrl must include a scheme (e.g. https://api.example.com) — bare hostnames are not supported" }}
+      {{- end }}
       matches:
-        - name: {{ (urlParse (required "pebble.apiUrl must be set when networkPolicy is enabled" .Values.pebble.apiUrl)).host | regexReplaceAll ":\\d+$" "" | quote }}
+        - name: {{ $apiHost | quote }}
         {{- range .Values.networkPolicy.allowedFQDNs }}
         - name: {{ . | quote }}
         {{- end }}
