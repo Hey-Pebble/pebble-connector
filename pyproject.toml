@@ -6,11 +6,13 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiohttp = "^3.9"
+aiohttp = "^3.13.5"
 asyncpg = "^0.29"
 "cloud-sql-python-connector" = {version = "^1.12", extras = ["asyncpg"]}
+cryptography = ">=46.0.7"
 google-auth = "^2.27"
-requests = "^2.31"
+pyasn1 = ">=0.6.3"
+requests = "^2.33.1"
 
 [tool.poetry.scripts]
 pebble-connector = "src.main:main"
