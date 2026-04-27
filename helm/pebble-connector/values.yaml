@@ -39,4 +39,19 @@ resources:
   limits:
     memory: 256Mi
 
+# Pod-level securityContext. Applied to the whole pod.
+podSecurityContext:
+  runAsNonRoot: true
+
+# Container-level securityContext for the connector container.
+# The connector image already drops to a non-root user (`pebble`) via the
+# Dockerfile's USER directive, so runAsNonRoot validation succeeds without
+# an explicit runAsUser.
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
 replicaCount: 1
