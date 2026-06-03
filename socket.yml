@@ -1,0 +1,34 @@
+version: 2
+
+# Blocking on critical-severity alerts (malware, supply-chain compromise,
+# known-bad maintainer) is configured at the Socket org level:
+# socket.dev/dashboard/org/pebble. This file is for repo-specific overrides.
+
+projectIgnorePaths:
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/__tests__/**"
+
+issueRules:
+  malware: true
+  gptMalware: true
+  gptAnomaly: true
+  troll: true
+  installScripts: true
+  shellAccess: true
+  filesystemAccess: true
+  networkAccess: true
+  envVars: true
+  hasNativeCode: true
+  obfuscatedFile: true
+  usesEval: true
+  dynamicRequire: true
+  gitDependency: true
+  gitHubDependency: true
+  httpDependency: true
+
+githubApp:
+  enabled: true
+  pullRequestAlertsEnabled: true
+  dependencyOverviewEnabled: true
+  projectReportsEnabled: true
