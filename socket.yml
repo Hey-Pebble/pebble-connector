@@ -4,11 +4,6 @@ version: 2
 # known-bad maintainer) is configured at the Socket org level:
 # socket.dev/dashboard/org/pebble. This file is for repo-specific overrides.
 
-projectIgnorePaths:
-  - "**/test/**"
-  - "**/tests/**"
-  - "**/__tests__/**"
-
 issueRules:
   malware: true
   gptMalware: true
