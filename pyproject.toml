@@ -11,7 +11,7 @@ asyncpg = "^0.29"
 "cloud-sql-python-connector" = {version = "^1.12", extras = ["asyncpg"]}
 cryptography = "^48.0.1"
 google-auth = "^2.27"
-pyasn1 = "^0.6.3"
+pyasn1 = "^0.6.4"
 requests = "^2.33.1"
 # Security floors (SEC-31) — transitive deps pinned to ensure CVE-fixed versions
 idna = ">=3.15"
