@@ -1,0 +1,98 @@
+{{- if .Values.networkPolicy.enabled }}
+# Deny-default egress NetworkPolicy with specific exceptions.
+# The connector only needs: backend API, GCP APIs (via PGA), Cloud SQL, DNS, metadata server.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "pebble-connector.fullname" . }}-egress
+  labels:
+    {{- include "pebble-connector.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "pebble-connector.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    # DNS resolution — kube-dns
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # DNS resolution — NodeLocal DNSCache (enabled by default on Autopilot)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: node-local-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+    # GKE metadata server (Workload Identity token fetch)
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32
+      ports:
+        - port: 80
+          protocol: TCP
+
+    # Cloud SQL read replica (private IP, Cloud SQL connector port)
+    - to:
+        - ipBlock:
+            cidr: {{ required "networkPolicy.cloudSqlCidr must be set when networkPolicy is enabled" .Values.networkPolicy.cloudSqlCidr }}
+      ports:
+        - port: 3307
+          protocol: TCP
+
+    # GCP APIs via Private Google Access VIP
+    # All *.googleapis.com resolves to this CIDR via the VPC private DNS zone.
+    # Covers: sqladmin.googleapis.com, oauth2.googleapis.com,
+    # identitytoolkit.googleapis.com, secretmanager.googleapis.com
+    - to:
+        - ipBlock:
+            cidr: 199.36.153.8/30
+      ports:
+        - port: 443
+          protocol: TCP
+---
+# FQDN-based egress policy for the backend API URL (auto-derived from pebble.apiUrl)
+# plus any additional FQDNs in networkPolicy.allowedFQDNs.
+# Requires GKE Dataplane V2 (enabled by default on Autopilot).
+# Note: networking.gke.io/v1alpha1 is an alpha API — may change in future GKE versions.
+apiVersion: networking.gke.io/v1alpha1
+kind: FQDNNetworkPolicy
+metadata:
+  name: {{ include "pebble-connector.fullname" . }}-egress-fqdn
+  labels:
+    {{- include "pebble-connector.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "pebble-connector.selectorLabels" . | nindent 6 }}
+  egress:
+    - ports:
+        - port: 443
+          protocol: TCP
+      {{- $apiHost := (urlParse (required "pebble.apiUrl must be set when networkPolicy is enabled" .Values.pebble.apiUrl)).host | regexReplaceAll ":\\d+$" "" }}
+      {{- if not $apiHost }}
+      {{- fail "pebble.apiUrl must include a scheme (e.g. https://api.example.com) — bare hostnames are not supported" }}
+      {{- end }}
+      matches:
+        - name: {{ $apiHost | quote }}
+        {{- range .Values.networkPolicy.allowedFQDNs }}
+        - name: {{ . | quote }}
+        {{- end }}
+{{- end }}
